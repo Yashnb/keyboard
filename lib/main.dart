@@ -1,7 +1,7 @@
-
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:tenor/tenor.dart';
+
 int i = 0;
 RouteObserver routeObserver = RouteObserver();
 var apikey = "Z03N88UPWBCY";
@@ -34,17 +34,19 @@ class _MyAppState extends State<MyApp> {
       ..selection = TextSelection.fromPosition(
           TextPosition(offset: _controller.text.length));
   }
- List<Widget> printTenorResponse(TenorResponse? res) {
-  List<Widget> list = [];
-  res?.results.forEach((tenorResult) {
-    var title = tenorResult.title;
-    var media = tenorResult.media;
-    print('$title: gif   ${i++}   : ${media?.gif?.previewUrl?.toString()}');
-    list.add(Image.network(media!.gif!.previewUrl.toString()));
-  });
-  gifs = list;
-  return list;
-}
+
+  List<Widget> printTenorResponse(TenorResponse? res) {
+    List<Widget> list = [];
+    res?.results.forEach((tenorResult) {
+      var title = tenorResult.title;
+      var media = tenorResult.media;
+      print('$title: gif   ${i++}   : ${media?.gif?.previewUrl?.toString()}');
+      list.add(Image.network(media!.gif!.url.toString(),fit: BoxFit.cover,));
+    });
+    gifs = list;
+    return list;
+  }
+
   @override
   Widget build(BuildContext context) {
     var contx = context;
@@ -58,9 +60,18 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Column(
           children: [
-            Expanded(child:  Container(
-              child: (gifs!=null)?ListView(children: gifs,):Container(),
-            ),),
+            Expanded(
+              child: Container(
+                child: (gifs != null)
+                    ? GridView.count(
+                        crossAxisSpacing: 10.0,
+                        mainAxisSpacing: 10.0,
+                        crossAxisCount: 2,
+                        children: gifs,
+                      )
+                    : Container(),
+              ),
+            ),
             Container(
                 height: 66.0,
                 color: Colors.blue,
@@ -160,11 +171,9 @@ class _MyAppState extends State<MyApp> {
                       IconButton(
                         icon: Icon(Icons.gif, size: 30),
                         onPressed: () async {
-                         var res = await api.requestTrendingGIF();
-                         printTenorResponse(res);
-                         setState(() {
-                           
-                         });
+                          var res = await api.requestTrendingGIF();
+                          printTenorResponse(res);
+                          setState(() {});
                         },
                       )
                     ],
