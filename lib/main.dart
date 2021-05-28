@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:tenor/tenor.dart';
 
 int i = 0;
+int j = 0;
 RouteObserver routeObserver = RouteObserver();
 var apikey = "Z03N88UPWBCY";
 var api = Tenor(apiKey: apikey);
 List<Widget> gifs = [];
+bool isgifclicked = false;
 void main() {
   runApp(MyApp());
 }
@@ -35,21 +37,44 @@ class _MyAppState extends State<MyApp> {
           TextPosition(offset: _controller.text.length));
   }
 
-  List<Widget> printTenorResponse(TenorResponse? res) {
-    List<Widget> list = [];
+  void printTenorResponse(TenorResponse? res) {
     res?.results.forEach((tenorResult) {
       var title = tenorResult.title;
       var media = tenorResult.media;
       print('$title: gif   ${i++}   : ${media?.gif?.previewUrl?.toString()}');
-      list.add(Image.network(media!.gif!.url.toString(),fit: BoxFit.cover,));
+      gifs.add(
+        Image.network(
+          media!.gif!.url.toString(),
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          },
+        ),
+      );
     });
-    gifs = list;
-    return list;
+  }
+
+  preLoad() async {
+    if (j == 0) {
+      var res = await api.requestTrendingGIF(
+        // contentFilter: ContentFilter.off
+        );
+      printTenorResponse(res);
+      j++;
+    }
+  }
+
+  @override
+  void initState() {
+    preLoad();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    var contx = context;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorObservers: [routeObserver],
@@ -60,17 +85,26 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Column(
           children: [
+            // isgifclicked
+            //     ? Container(
+            //       // child: ,
+            //         color: Colors.grey,
+            //         height: 50,
+            //         width: double.infinity,
+            //       )
+            //     : Container(),
             Expanded(
-              child: Container(
-                child: (gifs != null)
-                    ? GridView.count(
-                        crossAxisSpacing: 10.0,
-                        mainAxisSpacing: 10.0,
-                        crossAxisCount: 2,
-                        children: gifs,
-                      )
-                    : Container(),
-              ),
+              child: Container(),
+              // child: Container(
+              //   child: (isgifclicked)
+              //       ? GridView.count(
+              //           crossAxisSpacing: 10.0,
+              //           mainAxisSpacing: 10.0,
+              //           crossAxisCount: 2,
+              //           children: gifs,
+              //         )
+              //       : Container(),
+              // ),
             ),
             Container(
                 height: 66.0,
@@ -130,7 +164,17 @@ class _MyAppState extends State<MyApp> {
               offstage: !emojiShowing,
               child: Column(
                 children: [
-                  SizedBox(
+                  isgifclicked? SizedBox(
+                    height: 250,
+                child: (isgifclicked)
+                    ? GridView.count(
+                        crossAxisSpacing: 10.0,
+                        mainAxisSpacing: 10.0,
+                        crossAxisCount: 2,
+                        children: gifs,
+                      )
+                    : Container(),
+              ):SizedBox(
                     height: 250,
                     child: EmojiPicker(
                         onEmojiSelected: (Category category, Emoji emoji) {
@@ -171,8 +215,7 @@ class _MyAppState extends State<MyApp> {
                       IconButton(
                         icon: Icon(Icons.gif, size: 30),
                         onPressed: () async {
-                          var res = await api.requestTrendingGIF();
-                          printTenorResponse(res);
+                          isgifclicked = true;
                           setState(() {});
                         },
                       )
