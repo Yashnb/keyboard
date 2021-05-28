@@ -38,7 +38,8 @@ class _MyAppState extends State<MyApp> {
           TextPosition(offset: _controller.text.length));
   }
 
-  void printTenorResponse(TenorResponse? res) {
+  Future<void> printTenorResponse(TenorResponse? res) async {
+    gifs = [];
     res?.results.forEach((tenorResult) {
       var title = tenorResult.title;
       var media = tenorResult.media;
@@ -61,13 +62,13 @@ class _MyAppState extends State<MyApp> {
   preLoad(String search) async {
     if (j == 0) {
       var res = await api.requestTrendingGIF(
-          // contentFilter: ContentFilter.off
+          contentFilter: ContentFilter.low
           );
       printTenorResponse(res);
       j++;
     }
     else{
-      var res = await api.searchGIF(search);
+      var res = await api.searchGIF(search, contentFilter: ContentFilter.low);
       setState(() {
         printTenorResponse(res);
       });
@@ -178,9 +179,9 @@ class _MyAppState extends State<MyApp> {
                           height: 50,
                           child: TextField(
                             onChanged: (search){
+                              preLoad(search);
                                setState(() {
-                                 gifs.clear();
-                                  preLoad(search);
+                                  
                                });
                             },
                             controller: gifsearch,
