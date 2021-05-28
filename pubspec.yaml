@@ -10,15 +10,11 @@ dependencies:
     sdk: flutter
   characters: ^1.1.0
 
-  emoji_picker_flutter:
-    path: ../
   giphy_picker: ^2.0.0
   giphy_get: ^2.0.1
   tenor: ^1.0.9
+  emoji_picker_flutter: ^1.0.5
 
-dependency_overrides:
-  emoji_picker_flutter:
-    path: ../
 
 flutter:
   uses-material-design: true
