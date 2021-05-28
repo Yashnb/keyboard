@@ -13,6 +13,8 @@ dependencies:
   emoji_picker_flutter:
     path: ../
   giphy_picker: ^2.0.0
+  giphy_get: ^2.0.1
+  tenor: ^1.0.9
 
 dependency_overrides:
   emoji_picker_flutter:

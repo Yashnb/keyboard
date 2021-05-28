@@ -1,6 +1,12 @@
+
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
-
+import 'package:tenor/tenor.dart';
+int i = 0;
+RouteObserver routeObserver = RouteObserver();
+var apikey = "Z03N88UPWBCY";
+var api = Tenor(apiKey: apikey);
+List<Widget> gifs = [];
 void main() {
   runApp(MyApp());
 }
@@ -28,18 +34,33 @@ class _MyAppState extends State<MyApp> {
       ..selection = TextSelection.fromPosition(
           TextPosition(offset: _controller.text.length));
   }
-
+ List<Widget> printTenorResponse(TenorResponse? res) {
+  List<Widget> list = [];
+  res?.results.forEach((tenorResult) {
+    var title = tenorResult.title;
+    var media = tenorResult.media;
+    print('$title: gif   ${i++}   : ${media?.gif?.previewUrl?.toString()}');
+    list.add(Image.network(media!.gif!.previewUrl.toString()));
+  });
+  gifs = list;
+  return list;
+}
   @override
   Widget build(BuildContext context) {
+    var contx = context;
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      navigatorObservers: [routeObserver],
       home: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text('Emoji Picker Example App'),
+          title: const Text('Keyboard'),
         ),
         body: Column(
           children: [
-            Expanded(child: Container()),
+            Expanded(child:  Container(
+              child: (gifs!=null)?ListView(children: gifs,):Container(),
+            ),),
             Container(
                 height: 66.0,
                 color: Colors.blue,
@@ -132,11 +153,20 @@ class _MyAppState extends State<MyApp> {
                       Padding(
                         padding: const EdgeInsets.all(4.0),
                         child: IconButton(
-                          icon: Icon(Icons.emoji_emotions,size: 26),
+                          icon: Icon(Icons.emoji_emotions, size: 26),
                           onPressed: () {},
                         ),
                       ),
-                      IconButton(icon:Icon(Icons.gif,size: 30),onPressed: (){},)
+                      IconButton(
+                        icon: Icon(Icons.gif, size: 30),
+                        onPressed: () async {
+                         var res = await api.requestTrendingGIF();
+                         printTenorResponse(res);
+                         setState(() {
+                           
+                         });
+                        },
+                      )
                     ],
                   )),
                 ],
