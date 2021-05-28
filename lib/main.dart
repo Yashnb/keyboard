@@ -9,6 +9,7 @@ var apikey = "Z03N88UPWBCY";
 var api = Tenor(apiKey: apikey);
 List<Widget> gifs = [];
 bool isgifclicked = false;
+TextEditingController gifsearch = TextEditingController();
 void main() {
   runApp(MyApp());
 }
@@ -57,19 +58,25 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  preLoad() async {
+  preLoad(String search) async {
     if (j == 0) {
       var res = await api.requestTrendingGIF(
-        // contentFilter: ContentFilter.off
-        );
+          // contentFilter: ContentFilter.off
+          );
       printTenorResponse(res);
       j++;
+    }
+    else{
+      var res = await api.searchGIF(search);
+      setState(() {
+        printTenorResponse(res);
+      });
     }
   }
 
   @override
   void initState() {
-    preLoad();
+    preLoad(gifsearch.text);
     super.initState();
   }
 
@@ -164,43 +171,64 @@ class _MyAppState extends State<MyApp> {
               offstage: !emojiShowing,
               child: Column(
                 children: [
-                  isgifclicked? SizedBox(
-                    height: 250,
-                child: (isgifclicked)
-                    ? GridView.count(
-                        crossAxisSpacing: 10.0,
-                        mainAxisSpacing: 10.0,
-                        crossAxisCount: 2,
-                        children: gifs,
-                      )
-                    : Container(),
-              ):SizedBox(
-                    height: 250,
-                    child: EmojiPicker(
-                        onEmojiSelected: (Category category, Emoji emoji) {
-                          _onEmojiSelected(emoji);
-                        },
-                        onBackspacePressed: _onBackspacePressed,
-                        config: const Config(
-                            columns: 7,
-                            emojiSizeMax: 32.0,
-                            verticalSpacing: 0,
-                            horizontalSpacing: 0,
-                            initCategory: Category.RECENT,
-                            bgColor: Color(0xFFF2F2F2),
-                            indicatorColor: Colors.blue,
-                            iconColor: Colors.grey,
-                            iconColorSelected: Colors.blue,
-                            progressIndicatorColor: Colors.blue,
-                            backspaceColor: Colors.blue,
-                            showRecentsTab: true,
-                            recentsLimit: 28,
-                            noRecentsText: 'No Recents',
-                            noRecentsStyle:
-                                TextStyle(fontSize: 20, color: Colors.black26),
-                            categoryIcons: CategoryIcons(),
-                            buttonMode: ButtonMode.MATERIAL)),
-                  ),
+                  isgifclicked
+                      ? Container(
+                          width: double.infinity,
+                          color: Colors.grey[100],
+                          height: 50,
+                          child: TextField(
+                            onChanged: (search){
+                               setState(() {
+                                 gifs.clear();
+                                  preLoad(search);
+                               });
+                            },
+                            controller: gifsearch,
+                              decoration: InputDecoration(
+                                  prefixIcon: Icon(Icons.search))),
+                        )
+                      : Container(),
+                  isgifclicked
+                      ? SizedBox(
+                          height: 200,
+                          child: (isgifclicked)
+                              ? GridView.count(
+                                  padding: EdgeInsets.all(2),
+                                  crossAxisSpacing: 5.0,
+                                  mainAxisSpacing: 5.0,
+                                  crossAxisCount: 3,
+                                  children: gifs,
+                                )
+                              : Container(),
+                        )
+                      : SizedBox(
+                          height: 250,
+                          child: EmojiPicker(
+                              onEmojiSelected:
+                                  (Category category, Emoji emoji) {
+                                _onEmojiSelected(emoji);
+                              },
+                              onBackspacePressed: _onBackspacePressed,
+                              config: const Config(
+                                  columns: 7,
+                                  emojiSizeMax: 32.0,
+                                  verticalSpacing: 0,
+                                  horizontalSpacing: 0,
+                                  initCategory: Category.RECENT,
+                                  bgColor: Color(0xFFF2F2F2),
+                                  indicatorColor: Colors.blue,
+                                  iconColor: Colors.grey,
+                                  iconColorSelected: Colors.blue,
+                                  progressIndicatorColor: Colors.blue,
+                                  backspaceColor: Colors.blue,
+                                  showRecentsTab: true,
+                                  recentsLimit: 28,
+                                  noRecentsText: 'No Recents',
+                                  noRecentsStyle: TextStyle(
+                                      fontSize: 20, color: Colors.black26),
+                                  categoryIcons: CategoryIcons(),
+                                  buttonMode: ButtonMode.MATERIAL)),
+                        ),
                   Container(
                       child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -209,7 +237,10 @@ class _MyAppState extends State<MyApp> {
                         padding: const EdgeInsets.all(4.0),
                         child: IconButton(
                           icon: Icon(Icons.emoji_emotions, size: 26),
-                          onPressed: () {},
+                          onPressed: () {
+                            isgifclicked = false;
+                            setState(() {});
+                          },
                         ),
                       ),
                       IconButton(
